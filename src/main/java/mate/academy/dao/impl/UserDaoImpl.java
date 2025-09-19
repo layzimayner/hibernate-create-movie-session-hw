@@ -10,7 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 @Dao
-public class UserDoaImpl implements UserDao {
+public class UserDaoImpl implements UserDao {
 
     @Override
     public User save(User user) {

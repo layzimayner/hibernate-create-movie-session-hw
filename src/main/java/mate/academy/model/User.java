@@ -42,14 +42,27 @@ public class User {
             random.nextBytes(saltBytes);
             this.salt = Base64.getEncoder().encodeToString(saltBytes);
 
-            PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), saltBytes, 65536, 128);
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            byte[] hash = skf.generateSecret(spec).getEncoded();
-
-            this.password = Base64.getEncoder().encodeToString(hash);
+            this.password = hashPassword(password, saltBytes);
         } catch (Exception e) {
             throw new RuntimeException("Error while hashing password", e);
         }
+    }
+
+    public boolean checkPassword(String passwordToCheck) {
+        try {
+            byte[] saltBytes = Base64.getDecoder().decode(this.salt);
+            String hashedInput = hashPassword(passwordToCheck, saltBytes);
+            return this.password.equals(hashedInput);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while verifying password", e);
+        }
+    }
+
+    private String hashPassword(String password, byte[] saltBytes) throws Exception {
+        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), saltBytes, 65536, 128);
+        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        byte[] hash = skf.generateSecret(spec).getEncoded();
+        return Base64.getEncoder().encodeToString(hash);
     }
 
     public String getEmail() {
